@@ -1,0 +1,11 @@
+.claude/
+# --- file sensibili: NON pubblicare ---
+Password Progetto.txt
+*assword*
+*.env
+.env*
+secrets*
+*.log
+.DS_Store
+Thumbs.db
+node_modules/
