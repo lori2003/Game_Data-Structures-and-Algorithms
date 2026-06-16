@@ -2,7 +2,10 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>ALGO STRIKE — impara le Strutture Dati combattendo</title>
 <style>
   :root{
@@ -109,6 +112,9 @@
   .playerbox b{color:var(--cyan)}
   .toast{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);background:rgba(11,16,32,.96);border:1px solid var(--cyan);color:var(--cyan);padding:10px 18px;border-radius:10px;font-size:13.5px;z-index:30;opacity:0;transition:opacity .3s;pointer-events:none;max-width:88%;text-align:center}
   .toast.show{opacity:1}
+  #fsBtn{position:fixed;top:10px;right:12px;z-index:70;background:rgba(11,16,32,.72);border:1px solid var(--line);
+    color:var(--cyan);width:40px;height:36px;border-radius:9px;font-size:17px;cursor:pointer;line-height:1}
+  #fsBtn:hover{border-color:var(--cyan);background:rgba(11,16,32,.95)}
   .minibtn{background:var(--panel2);border:1px solid var(--line);border-radius:6px;color:var(--txt);padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit}
   .minibtn:hover{border-color:var(--cyan);color:var(--cyan)}
   .lbrow{display:flex;justify-content:space-between;align-items:center;padding:9px 6px;border-bottom:1px solid var(--line);font-size:14px}
@@ -244,6 +250,7 @@
 </div>
 
 <div id="rotateHint"><div class="ic">📱</div><div>Ruota il telefono in <b>orizzontale</b><br>per giocare ad ALGO STRIKE</div></div>
+<button id="fsBtn" title="Schermo intero">⛶</button>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -445,6 +452,13 @@ let combo=0, comboMax=0, runXp=0, plevel=1;
 let msg='', msgCol='#fff', msgT=0, banner='', bannerT=0, lastT=0;
 
 const loginEl=el('login'),menu=el('menu'),briefing=el('briefing'),winS=el('win'),overS=el('over'),vicS=el('victory'),codexS=el('codex'),lbS=el('lb');
+const fsBtn=el('fsBtn');
+function toggleFS(){ const d=document, root=d.documentElement;
+  try{
+    if(!(d.fullscreenElement||d.webkitFullscreenElement)){ const rq=root.requestFullscreen||root.webkitRequestFullscreen; if(rq) rq.call(root); }
+    else { const ex=d.exitFullscreen||d.webkitExitFullscreen; if(ex) ex.call(d); }
+  }catch(e){}
+}
 function showOnly(o){[loginEl,menu,briefing,winS,overS,vicS,codexS,lbS].forEach(x=>x.classList.add('hidden')); if(o)o.classList.remove('hidden');}
 
 // ---------- input ----------
@@ -1032,6 +1046,7 @@ function objective(){switch(M.key){
 let _vw=0,_vh=0;
 function loop(t){const dt=Math.min(.033,(t-lastT)/1000||0); lastT=t;
   if(window.innerWidth!==_vw||window.innerHeight!==_vh){_vw=window.innerWidth;_vh=window.innerHeight;fitScale();}
+  if(fsBtn){ const d=(state==='playing')?'none':'block'; if(fsBtn.style.display!==d)fsBtn.style.display=d; }
   if(state==='playing')update(dt); render(); requestAnimationFrame(loop);}
 
 // ---------- menus ----------
@@ -1098,7 +1113,14 @@ el('loginBtn').onclick=doLogin;
 el('loginName').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
 el('logoutBtn').onclick=()=>{ showLogin(); };
 el('loadBtn').onclick=loadSaves;
-el('resetBtn').onclick=()=>{if(confirm('Azzerare tutti i progressi?')){DB={unlocked:0,xp:0,bestCombo:0,best:{},codex:[]};save();buildGrid();}};
+if(fsBtn) fsBtn.onclick=toggleFS;
+document.addEventListener('fullscreenchange',fitScale);
+document.addEventListener('webkitfullscreenchange',fitScale);
+el('resetBtn').onclick=()=>{
+  if(confirm('Azzerare i progressi SOLO su questo dispositivo?\n\nI salvataggi sul cloud (sotto il tuo nome) NON vengono cancellati: al prossimo accesso, o con "Carica salvataggi", li ritrovi.')){
+    DB={unlocked:0,xp:0,bestCombo:0,best:{},codex:[]}; save(); buildGrid(); refreshMenuStats();
+    toast('Progressi locali azzerati — il cloud resta intatto.');
+  }};
 
 // ---------- boot ----------
 buildGrid(); fitScale(); showLogin(); requestAnimationFrame(loop);
