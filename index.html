@@ -98,8 +98,17 @@
   .namebox input:focus{border-color:var(--cyan)}
   .clouddot{font-size:12px;color:#5a6b8c;letter-spacing:.5px}
   .clouddot.ok{color:var(--grn)} .clouddot.err{color:var(--mag)} .clouddot.saving{color:var(--yel)}
-  .namehint{margin-top:8px;font-size:12.5px;color:var(--yel);max-width:440px;line-height:1.5}
-  .namehint b{color:#fff}
+  .logincard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px 28px;max-width:420px;width:100%;margin-top:10px}
+  .logincard input{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:#fff;padding:13px 14px;font-size:18px;font-family:inherit;text-align:center;outline:none;letter-spacing:1px}
+  .logincard input:focus{border-color:var(--cyan)}
+  .logincard .btn{width:100%;margin:14px 0 0}
+  .loginmsg{min-height:18px;margin-top:10px;font-size:13px}
+  .loginnote{margin-top:14px;font-size:12px;color:var(--muted);line-height:1.5}
+  .loginnote b{color:var(--cyan)}
+  .playerbox{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap;justify-content:center;font-size:14px;color:var(--muted)}
+  .playerbox b{color:var(--cyan)}
+  .minibtn{background:var(--panel2);border:1px solid var(--line);border-radius:6px;color:var(--txt);padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit}
+  .minibtn:hover{border-color:var(--cyan);color:var(--cyan)}
   .lbrow{display:flex;justify-content:space-between;align-items:center;padding:9px 6px;border-bottom:1px solid var(--line);font-size:14px}
   .lbrow:last-child{border:none}
   .lbrow .rk{color:var(--yel);font-weight:800;width:38px}
@@ -114,8 +123,21 @@
   <div class="scan"></div>
   <div class="vig"></div>
 
+  <!-- LOGIN -->
+  <div id="login" class="overlay">
+    <div class="sub">accedi col tuo nome per salvare &amp; sincronizzare</div>
+    <h1 style="font-size:46px">ALGO STRIKE</h1>
+    <div class="logincard">
+      <div style="font-size:15px;color:var(--muted);margin-bottom:4px">👤 Inserisci il tuo nome</div>
+      <input id="loginName" maxlength="16" placeholder="es. Lorenzo" autocomplete="off">
+      <button class="btn" id="loginBtn">ACCEDI ▸</button>
+      <div class="loginmsg" id="loginMsg"></div>
+      <div class="loginnote">Con un nome già usato ritrovi <b>tutti i tuoi progressi</b>. Usa <b>sempre lo stesso nome</b> su telefono e PC. Senza nome non si salva nulla.</div>
+    </div>
+  </div>
+
   <!-- MENU -->
-  <div id="menu" class="overlay">
+  <div id="menu" class="overlay hidden">
     <div class="sub">strutture dati &amp; algoritmi · cyber shooter</div>
     <h1>ALGO STRIKE</h1>
     <p>Sei un <b style="color:var(--txt)">Debugger</b>. La memoria è sotto attacco. Impara le strutture dati
@@ -125,12 +147,11 @@
       <div>XP TOTALE<b id="stXp">0</b></div>
       <div>MIGLIOR COMBO<b id="stCombo">0</b></div>
     </div>
-    <div class="namebox">
-      <span>👤</span>
-      <input id="nameInput" maxlength="16" placeholder="Il tuo nome" autocomplete="off">
+    <div class="playerbox">
+      <span>👤 <b id="playerChip">—</b></span>
       <span id="cloudDot" class="clouddot" title="Stato salvataggio cloud">● cloud</span>
+      <button class="minibtn" id="logoutBtn">Cambia utente</button>
     </div>
-    <div class="namehint" id="nameHint">✍️ Scrivi il tuo nome (es. <b>Lorenzo</b>) per salvare e sincronizzare i progressi tra telefono e PC. Usa <b>sempre lo stesso nome</b> su tutti i dispositivi.</div>
     <div class="grid" id="levelGrid"></div>
     <div>
       <button class="btn mag" id="codexBtn">📖 CODEX</button>
@@ -300,12 +321,12 @@ async function loadLeaderboard(){
 }
 // Allinea i progressi tra dispositivi: ricostruisce DB dai completamenti su Supabase (chiave = nome giocatore)
 async function syncFromCloud(){
-  if(!sb || !hasName()) return;                    // sincronizza SOLO se hai inserito il nome
+  if(!sb || !hasName()) return 0;                   // sincronizza SOLO se hai inserito il nome
   const name=playerName();
   try{
     const {data,error}=await sb.from('mission_completions')
       .select('id,mission_key,mission_index,score,combo_max').eq('player_name',name);
-    if(error||!data||!data.length) return;
+    if(error||!data||!data.length) return 0;
     const seen=new Set();
     let unlocked=DB.unlocked, bc=DB.bestCombo, cloudXp=0;
     const best=Object.assign({},DB.best), codex=new Set(DB.codex);
@@ -321,7 +342,8 @@ async function syncFromCloud(){
     DB.bestCombo=bc; DB.best=best; DB.codex=[...codex];
     save();
     if(state==='menu'){ refreshMenuStats(); buildGrid(); }
-  }catch(e){ console.warn('sync fail',e); }
+    return seen.size;
+  }catch(e){ console.warn('sync fail',e); return 0; }
 }
 
 // ---------- mission catalog ----------
@@ -418,11 +440,11 @@ let shake=0, score=0, shotsFired=0, shotsHit=0;
 let combo=0, comboMax=0, runXp=0, plevel=1;
 let msg='', msgCol='#fff', msgT=0, banner='', bannerT=0, lastT=0;
 
-const menu=el('menu'),briefing=el('briefing'),winS=el('win'),overS=el('over'),vicS=el('victory'),codexS=el('codex'),lbS=el('lb');
-function showOnly(o){[menu,briefing,winS,overS,vicS,codexS,lbS].forEach(x=>x.classList.add('hidden')); if(o)o.classList.remove('hidden');}
+const loginEl=el('login'),menu=el('menu'),briefing=el('briefing'),winS=el('win'),overS=el('over'),vicS=el('victory'),codexS=el('codex'),lbS=el('lb');
+function showOnly(o){[loginEl,menu,briefing,winS,overS,vicS,codexS,lbS].forEach(x=>x.classList.add('hidden')); if(o)o.classList.remove('hidden');}
 
 // ---------- input ----------
-addEventListener('keydown',e=>{const k=e.key.toLowerCase(); keys[k]=true; if(k===' ')e.preventDefault();});
+addEventListener('keydown',e=>{ if(e.target&&/^(INPUT|TEXTAREA)$/.test(e.target.tagName))return; const k=e.key.toLowerCase(); keys[k]=true; if(k===' ')e.preventDefault();});
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
 cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect(); mouse.x=(e.clientX-r.left)*(W/r.width); mouse.y=(e.clientY-r.top)*(H/r.height);});
 cv.addEventListener('mousedown',()=>{mouse.down=true;actx();});
@@ -1011,6 +1033,21 @@ function loop(t){const dt=Math.min(.033,(t-lastT)/1000||0); lastT=t;
 // ---------- menus ----------
 function refreshMenuStats(){el('stMissions').textContent=Math.min(DB.unlocked,MISSIONS.length)+'/'+MISSIONS.length;
   el('stXp').textContent=DB.xp; el('stCombo').textContent=DB.bestCombo;}
+function updatePlayerChip(){ const c=el('playerChip'); if(c) c.textContent=playerName()||'—'; setCloudDot(); }
+function showLogin(){ const i=el('loginName'); if(i) i.value=localStorage.getItem('algostrike_pname')||'';
+  const m=el('loginMsg'); if(m) m.textContent=''; showOnly(loginEl); state='login'; if(i) setTimeout(()=>{try{i.focus();}catch(e){}},60); }
+async function doLogin(){
+  const i=el('loginName'), m=el('loginMsg'); const v=(i?i.value:'').trim();
+  if(!v){ if(m){ m.style.color='var(--mag)'; m.textContent='Scrivi il tuo nome per accedere.'; } if(i)i.focus(); return; }
+  localStorage.setItem('algostrike_pname', v);
+  if(m){ m.style.color='var(--cyan)'; m.textContent='Accesso in corso…'; }
+  const prev=JSON.stringify(DB);
+  DB={unlocked:0,xp:0,bestCombo:0,best:{},codex:[]};      // carica i salvataggi di QUESTO nome dal cloud
+  const n=await syncFromCloud();
+  if(!sb){ try{DB=JSON.parse(prev);}catch(e){} }           // offline: tieni i progressi locali
+  save(); updatePlayerChip(); buildGrid(); refreshMenuStats();
+  showOnly(menu); state='menu';
+}
 function buildGrid(){const g=el('levelGrid');g.innerHTML='';
   MISSIONS.forEach((lv,i)=>{const locked=i>DB.unlocked; const done=i<DB.unlocked;
     const d=document.createElement('div'); d.className='lvl'+(locked?' locked':'')+(lv.boss?' boss':'');
@@ -1047,13 +1084,13 @@ el('codexBtn').onclick=()=>{buildCodex();showOnly(codexS);};
 el('codexClose').onclick=()=>{buildGrid();showOnly(menu);state='menu';};
 el('lbBtn').onclick=()=>{showOnly(lbS);loadLeaderboard();};
 el('lbClose').onclick=()=>{buildGrid();showOnly(menu);state='menu';};
-(function(){const nin=el('nameInput'); if(nin){ nin.value=localStorage.getItem('algostrike_pname')||'';
-  let t; nin.oninput=()=>{ localStorage.setItem('algostrike_pname',nin.value); setCloudDot(); updateNameHint(); clearTimeout(t); t=setTimeout(syncFromCloud,700); };
-} setCloudDot(); updateNameHint();})();
+el('loginBtn').onclick=doLogin;
+el('loginName').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+el('logoutBtn').onclick=()=>{ showLogin(); };
 el('resetBtn').onclick=()=>{if(confirm('Azzerare tutti i progressi?')){DB={unlocked:0,xp:0,bestCombo:0,best:{},codex:[]};save();buildGrid();}};
 
 // ---------- boot ----------
-buildGrid(); showOnly(menu); fitScale(); syncFromCloud(); requestAnimationFrame(loop);
+buildGrid(); fitScale(); showLogin(); requestAnimationFrame(loop);
 </script>
 </body>
 </html>
