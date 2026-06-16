@@ -98,6 +98,10 @@
   .namebox input:focus{border-color:var(--cyan)}
   .clouddot{font-size:12px;color:#5a6b8c;letter-spacing:.5px}
   .clouddot.ok{color:var(--grn)} .clouddot.err{color:var(--mag)} .clouddot.saving{color:var(--yel)}
+  .syncbox{display:flex;align-items:center;gap:7px;margin-top:8px;flex-wrap:wrap;justify-content:center;font-size:12px;color:var(--muted)}
+  .syncbox input{background:var(--panel2);border:1px solid var(--line);border-radius:6px;color:#9fe9ff;padding:5px 8px;font-size:11px;font-family:monospace;width:150px;text-align:center}
+  .minibtn{background:var(--panel2);border:1px solid var(--line);border-radius:6px;color:var(--txt);padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit}
+  .minibtn:hover{border-color:var(--cyan);color:var(--cyan)}
   .lbrow{display:flex;justify-content:space-between;align-items:center;padding:9px 6px;border-bottom:1px solid var(--line);font-size:14px}
   .lbrow:last-child{border:none}
   .lbrow .rk{color:var(--yel);font-weight:800;width:38px}
@@ -127,6 +131,12 @@
       <span>👤</span>
       <input id="nameInput" maxlength="16" placeholder="Il tuo nome" autocomplete="off">
       <span id="cloudDot" class="clouddot" title="Stato salvataggio cloud">● cloud</span>
+    </div>
+    <div class="syncbox">
+      <span>🔗 Codice salvataggio</span>
+      <input id="syncCode" readonly title="Copialo e incollalo sull'altro dispositivo per allineare i progressi">
+      <button class="minibtn" id="copyCode">📋 Copia</button>
+      <button class="minibtn" id="pasteCode">Incolla da altro device</button>
     </div>
     <div class="grid" id="levelGrid"></div>
     <div>
@@ -289,6 +299,36 @@ async function loadLeaderboard(){
     if(!data||!data.length){ box.innerHTML='<div class="cdx">Ancora nessun punteggio. Completa una missione per entrare in classifica! 🚀</div>'; return; }
     box.innerHTML=data.map((r,i)=>`<div class="lbrow"><span class="rk">#${i+1}</span><span class="nm">${esc(r.player_name)}</span><span class="mi">${esc(r.mission_title||'')}</span><span class="sc">★ ${r.score}</span></div>`).join('');
   }catch(e){ box.innerHTML='<div class="cdx">Errore: '+esc(e.message)+'</div>'; }
+}
+// Allinea i progressi tra dispositivi: ricostruisce DB dai completamenti su Supabase (chiave = nome giocatore)
+async function syncFromCloud(){
+  if(!sb) return;
+  const id=playerId(), name=playerName();
+  try{
+    const rows=[];
+    const a=await sb.from('mission_completions').select('id,mission_key,mission_index,score,combo_max').eq('player_id',id);
+    if(a&&a.data) rows.push(...a.data);
+    if(name && name.toLowerCase()!=='anonimo'){            // sync anche per nome (cross-device)
+      const b=await sb.from('mission_completions').select('id,mission_key,mission_index,score,combo_max').eq('player_name',name);
+      if(b&&b.data) rows.push(...b.data);
+    }
+    if(!rows.length) return;
+    const seen=new Set();                                   // dedup per riga (id univoco)
+    let unlocked=DB.unlocked, bc=DB.bestCombo, cloudXp=0;
+    const best=Object.assign({},DB.best), codex=new Set(DB.codex);
+    for(const r of rows){
+      if(seen.has(r.id)) continue; seen.add(r.id);
+      unlocked=Math.max(unlocked,(r.mission_index||0)+1);
+      cloudXp+=r.score||0; bc=Math.max(bc,r.combo_max||0);
+      best[r.mission_key]=Math.max(best[r.mission_key]||0, r.score||0);
+      codex.add(r.mission_key);
+    }
+    DB.unlocked=Math.min(MISSIONS.length, unlocked);
+    DB.xp=Math.max(DB.xp, cloudXp);     // mai perdere progressi: tiene il valore più alto
+    DB.bestCombo=bc; DB.best=best; DB.codex=[...codex];
+    save();
+    if(state==='menu'){ refreshMenuStats(); buildGrid(); }
+  }catch(e){ console.warn('sync fail',e); }
 }
 
 // ---------- mission catalog ----------
@@ -1015,11 +1055,19 @@ el('codexClose').onclick=()=>{buildGrid();showOnly(menu);state='menu';};
 el('lbBtn').onclick=()=>{showOnly(lbS);loadLeaderboard();};
 el('lbClose').onclick=()=>{buildGrid();showOnly(menu);state='menu';};
 (function(){const nin=el('nameInput'); if(nin){ nin.value=localStorage.getItem('algostrike_pname')||'';
-  nin.oninput=()=>localStorage.setItem('algostrike_pname',nin.value);} setCloudDot();})();
+  let t; nin.oninput=()=>{ localStorage.setItem('algostrike_pname',nin.value); clearTimeout(t); t=setTimeout(syncFromCloud,700); };
+} setCloudDot();})();
+(function(){ const sc=el('syncCode'); if(sc) sc.value=playerId();
+  const cp=el('copyCode'); if(cp) cp.onclick=()=>{ try{navigator.clipboard.writeText(playerId());}catch(e){} if(sc&&sc.select)sc.select();
+    cp.textContent='✓ Copiato'; setTimeout(()=>cp.textContent='📋 Copia',1500); };
+  const pp=el('pasteCode'); if(pp) pp.onclick=async()=>{ const c=prompt('Incolla qui il Codice salvataggio copiato dall\'altro dispositivo:');
+    if(c&&c.trim()){ localStorage.setItem('algostrike_pid',c.trim()); if(sc)sc.value=c.trim(); await syncFromCloud();
+      alert('✓ Sincronizzato! I progressi sono stati allineati a quel dispositivo.'); } };
+})();
 el('resetBtn').onclick=()=>{if(confirm('Azzerare tutti i progressi?')){DB={unlocked:0,xp:0,bestCombo:0,best:{},codex:[]};save();buildGrid();}};
 
 // ---------- boot ----------
-buildGrid(); showOnly(menu); fitScale(); requestAnimationFrame(loop);
+buildGrid(); showOnly(menu); fitScale(); syncFromCloud(); requestAnimationFrame(loop);
 </script>
 </body>
 </html>
