@@ -107,6 +107,8 @@
   .loginnote b{color:var(--cyan)}
   .playerbox{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap;justify-content:center;font-size:14px;color:var(--muted)}
   .playerbox b{color:var(--cyan)}
+  .toast{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);background:rgba(11,16,32,.96);border:1px solid var(--cyan);color:var(--cyan);padding:10px 18px;border-radius:10px;font-size:13.5px;z-index:30;opacity:0;transition:opacity .3s;pointer-events:none;max-width:88%;text-align:center}
+  .toast.show{opacity:1}
   .minibtn{background:var(--panel2);border:1px solid var(--line);border-radius:6px;color:var(--txt);padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit}
   .minibtn:hover{border-color:var(--cyan);color:var(--cyan)}
   .lbrow{display:flex;justify-content:space-between;align-items:center;padding:9px 6px;border-bottom:1px solid var(--line);font-size:14px}
@@ -122,6 +124,7 @@
   <canvas id="cv" width="1000" height="640"></canvas>
   <div class="scan"></div>
   <div class="vig"></div>
+  <div id="toast" class="toast"></div>
 
   <!-- LOGIN -->
   <div id="login" class="overlay">
@@ -150,6 +153,7 @@
     <div class="playerbox">
       <span>👤 <b id="playerChip">—</b></span>
       <span id="cloudDot" class="clouddot" title="Stato salvataggio cloud">● cloud</span>
+      <button class="minibtn" id="loadBtn">🔄 Carica salvataggi</button>
       <button class="minibtn" id="logoutBtn">Cambia utente</button>
     </div>
     <div class="grid" id="levelGrid"></div>
@@ -1034,19 +1038,25 @@ function loop(t){const dt=Math.min(.033,(t-lastT)/1000||0); lastT=t;
 function refreshMenuStats(){el('stMissions').textContent=Math.min(DB.unlocked,MISSIONS.length)+'/'+MISSIONS.length;
   el('stXp').textContent=DB.xp; el('stCombo').textContent=DB.bestCombo;}
 function updatePlayerChip(){ const c=el('playerChip'); if(c) c.textContent=playerName()||'—'; setCloudDot(); }
+function toast(t){ const e=el('toast'); if(!e)return; e.textContent=t; e.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>e.classList.remove('show'),2800); }
+async function loadSaves(){ if(!hasName()){ toast('Accedi con un nome prima.'); return; }
+  toast('Carico i salvataggi…'); const n=await syncFromCloud(); refreshMenuStats(); buildGrid();
+  toast(n>0 ? ('✓ Caricati '+Math.min(DB.unlocked,MISSIONS.length)+'/'+MISSIONS.length+' livelli · codex '+DB.codex.length+'/'+MISSIONS.length) : ('Nessun salvataggio per "'+playerName()+'"')); }
 function showLogin(){ const i=el('loginName'); if(i) i.value=localStorage.getItem('algostrike_pname')||'';
   const m=el('loginMsg'); if(m) m.textContent=''; showOnly(loginEl); state='login'; if(i) setTimeout(()=>{try{i.focus();}catch(e){}},60); }
 async function doLogin(){
   const i=el('loginName'), m=el('loginMsg'); const v=(i?i.value:'').trim();
   if(!v){ if(m){ m.style.color='var(--mag)'; m.textContent='Scrivi il tuo nome per accedere.'; } if(i)i.focus(); return; }
   localStorage.setItem('algostrike_pname', v);
-  if(m){ m.style.color='var(--cyan)'; m.textContent='Accesso in corso…'; }
+  if(m){ m.style.color='var(--cyan)'; m.textContent='Carico i salvataggi…'; }
   const prev=JSON.stringify(DB);
   DB={unlocked:0,xp:0,bestCombo:0,best:{},codex:[]};      // carica i salvataggi di QUESTO nome dal cloud
   const n=await syncFromCloud();
   if(!sb){ try{DB=JSON.parse(prev);}catch(e){} }           // offline: tieni i progressi locali
   save(); updatePlayerChip(); buildGrid(); refreshMenuStats();
   showOnly(menu); state='menu';
+  toast(n>0 ? ('✓ Bentornato '+v+'! Ripristinati '+Math.min(DB.unlocked,MISSIONS.length)+'/'+MISSIONS.length+' livelli · codex '+DB.codex.length+'/'+MISSIONS.length+' · XP '+DB.xp)
+            : ('✓ Benvenuto '+v+'!'+(sb?' Nuova partita.':' (offline)')));
 }
 function buildGrid(){const g=el('levelGrid');g.innerHTML='';
   MISSIONS.forEach((lv,i)=>{const locked=i>DB.unlocked; const done=i<DB.unlocked;
@@ -1087,6 +1097,7 @@ el('lbClose').onclick=()=>{buildGrid();showOnly(menu);state='menu';};
 el('loginBtn').onclick=doLogin;
 el('loginName').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
 el('logoutBtn').onclick=()=>{ showLogin(); };
+el('loadBtn').onclick=loadSaves;
 el('resetBtn').onclick=()=>{if(confirm('Azzerare tutti i progressi?')){DB={unlocked:0,xp:0,bestCombo:0,best:{},codex:[]};save();buildGrid();}};
 
 // ---------- boot ----------
