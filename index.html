@@ -98,10 +98,8 @@
   .namebox input:focus{border-color:var(--cyan)}
   .clouddot{font-size:12px;color:#5a6b8c;letter-spacing:.5px}
   .clouddot.ok{color:var(--grn)} .clouddot.err{color:var(--mag)} .clouddot.saving{color:var(--yel)}
-  .syncbox{display:flex;align-items:center;gap:7px;margin-top:8px;flex-wrap:wrap;justify-content:center;font-size:12px;color:var(--muted)}
-  .syncbox input{background:var(--panel2);border:1px solid var(--line);border-radius:6px;color:#9fe9ff;padding:5px 8px;font-size:11px;font-family:monospace;width:150px;text-align:center}
-  .minibtn{background:var(--panel2);border:1px solid var(--line);border-radius:6px;color:var(--txt);padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit}
-  .minibtn:hover{border-color:var(--cyan);color:var(--cyan)}
+  .namehint{margin-top:8px;font-size:12.5px;color:var(--yel);max-width:440px;line-height:1.5}
+  .namehint b{color:#fff}
   .lbrow{display:flex;justify-content:space-between;align-items:center;padding:9px 6px;border-bottom:1px solid var(--line);font-size:14px}
   .lbrow:last-child{border:none}
   .lbrow .rk{color:var(--yel);font-weight:800;width:38px}
@@ -132,12 +130,7 @@
       <input id="nameInput" maxlength="16" placeholder="Il tuo nome" autocomplete="off">
       <span id="cloudDot" class="clouddot" title="Stato salvataggio cloud">● cloud</span>
     </div>
-    <div class="syncbox">
-      <span>🔗 Codice salvataggio</span>
-      <input id="syncCode" readonly title="Copialo e incollalo sull'altro dispositivo per allineare i progressi">
-      <button class="minibtn" id="copyCode">📋 Copia</button>
-      <button class="minibtn" id="pasteCode">Incolla da altro device</button>
-    </div>
+    <div class="namehint" id="nameHint">✍️ Scrivi il tuo nome (es. <b>Lorenzo</b>) per salvare e sincronizzare i progressi tra telefono e PC. Usa <b>sempre lo stesso nome</b> su tutti i dispositivi.</div>
     <div class="grid" id="levelGrid"></div>
     <div>
       <button class="btn mag" id="codexBtn">📖 CODEX</button>
@@ -264,7 +257,7 @@ const sfx={
 const SAVE='algostrike_v2';
 let DB={unlocked:0, xp:0, bestCombo:0, best:{}, codex:[]};
 function load(){ try{const d=JSON.parse(localStorage.getItem(SAVE)); if(d)DB=Object.assign(DB,d);}catch(e){} }
-function save(){ try{localStorage.setItem(SAVE,JSON.stringify(DB));}catch(e){} }
+function save(){ if(!hasName())return; try{localStorage.setItem(SAVE,JSON.stringify(DB));}catch(e){} }
 load();
 
 // ---------- Supabase (cloud save + leaderboard) ----------
@@ -276,11 +269,16 @@ catch(e){ console.warn('Supabase init fallita:',e); }
 function esc(s){ return String(s==null?'':s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])); }
 function playerId(){ let id=localStorage.getItem('algostrike_pid');
   if(!id){ id=(crypto&&crypto.randomUUID)?crypto.randomUUID():('p'+Date.now()+Math.random().toString(16).slice(2)); localStorage.setItem('algostrike_pid',id);} return id; }
-function playerName(){ return (localStorage.getItem('algostrike_pname')||'').trim()||'Anonimo'; }
-function setCloudDot(s){ const d=el('cloudDot'); if(!d)return; d.className='clouddot '+(s||'');
+function playerName(){ return (localStorage.getItem('algostrike_pname')||'').trim(); }
+function hasName(){ return playerName().length>0; }
+function setCloudDot(s){ const d=el('cloudDot'); if(!d)return;
+  if(!hasName()){ d.className='clouddot err'; d.textContent='● inserisci il nome per salvare'; return; }
+  d.className='clouddot '+(s||'');
   d.textContent = s==='ok'?'● salvato':(s==='saving'?'● salvataggio…':(s==='err'?'● offline':(sb?'● cloud pronto':'● cloud off'))); }
+function updateNameHint(){ const h=el('nameHint'); if(h) h.style.display=hasName()?'none':'block'; }
 async function cloudSave(rec){
   const cs=el('cloudStatus');
+  if(!hasName()){ if(cs)cs.textContent='⚠ Progressi NON salvati: scrivi il tuo nome nel menu (es. Lorenzo) e rigioca.'; setCloudDot(); return; }
   if(!sb){ if(cs)cs.textContent='☁ Cloud non attivo — progressi salvati in locale.'; return; }
   if(cs)cs.textContent='☁ Salvataggio su Supabase…'; setCloudDot('saving');
   try{
@@ -302,21 +300,16 @@ async function loadLeaderboard(){
 }
 // Allinea i progressi tra dispositivi: ricostruisce DB dai completamenti su Supabase (chiave = nome giocatore)
 async function syncFromCloud(){
-  if(!sb) return;
-  const id=playerId(), name=playerName();
+  if(!sb || !hasName()) return;                    // sincronizza SOLO se hai inserito il nome
+  const name=playerName();
   try{
-    const rows=[];
-    const a=await sb.from('mission_completions').select('id,mission_key,mission_index,score,combo_max').eq('player_id',id);
-    if(a&&a.data) rows.push(...a.data);
-    if(name && name.toLowerCase()!=='anonimo'){            // sync anche per nome (cross-device)
-      const b=await sb.from('mission_completions').select('id,mission_key,mission_index,score,combo_max').eq('player_name',name);
-      if(b&&b.data) rows.push(...b.data);
-    }
-    if(!rows.length) return;
-    const seen=new Set();                                   // dedup per riga (id univoco)
+    const {data,error}=await sb.from('mission_completions')
+      .select('id,mission_key,mission_index,score,combo_max').eq('player_name',name);
+    if(error||!data||!data.length) return;
+    const seen=new Set();
     let unlocked=DB.unlocked, bc=DB.bestCombo, cloudXp=0;
     const best=Object.assign({},DB.best), codex=new Set(DB.codex);
-    for(const r of rows){
+    for(const r of data){
       if(seen.has(r.id)) continue; seen.add(r.id);
       unlocked=Math.max(unlocked,(r.mission_index||0)+1);
       cloudXp+=r.score||0; bc=Math.max(bc,r.combo_max||0);
@@ -1055,15 +1048,8 @@ el('codexClose').onclick=()=>{buildGrid();showOnly(menu);state='menu';};
 el('lbBtn').onclick=()=>{showOnly(lbS);loadLeaderboard();};
 el('lbClose').onclick=()=>{buildGrid();showOnly(menu);state='menu';};
 (function(){const nin=el('nameInput'); if(nin){ nin.value=localStorage.getItem('algostrike_pname')||'';
-  let t; nin.oninput=()=>{ localStorage.setItem('algostrike_pname',nin.value); clearTimeout(t); t=setTimeout(syncFromCloud,700); };
-} setCloudDot();})();
-(function(){ const sc=el('syncCode'); if(sc) sc.value=playerId();
-  const cp=el('copyCode'); if(cp) cp.onclick=()=>{ try{navigator.clipboard.writeText(playerId());}catch(e){} if(sc&&sc.select)sc.select();
-    cp.textContent='✓ Copiato'; setTimeout(()=>cp.textContent='📋 Copia',1500); };
-  const pp=el('pasteCode'); if(pp) pp.onclick=async()=>{ const c=prompt('Incolla qui il Codice salvataggio copiato dall\'altro dispositivo:');
-    if(c&&c.trim()){ localStorage.setItem('algostrike_pid',c.trim()); if(sc)sc.value=c.trim(); await syncFromCloud();
-      alert('✓ Sincronizzato! I progressi sono stati allineati a quel dispositivo.'); } };
-})();
+  let t; nin.oninput=()=>{ localStorage.setItem('algostrike_pname',nin.value); setCloudDot(); updateNameHint(); clearTimeout(t); t=setTimeout(syncFromCloud,700); };
+} setCloudDot(); updateNameHint();})();
 el('resetBtn').onclick=()=>{if(confirm('Azzerare tutti i progressi?')){DB={unlocked:0,xp:0,bestCombo:0,best:{},codex:[]};save();buildGrid();}};
 
 // ---------- boot ----------
