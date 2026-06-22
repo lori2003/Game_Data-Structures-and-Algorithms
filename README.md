@@ -1,6 +1,6 @@
-# 🎮 ALGO STRIKE
+# 🧭 ALGO QUEST
 
-Uno **sparatutto top-down** giocabile nel browser che insegna le **Strutture Dati & Algoritmi** partendo da zero. Ogni missione spiega un concetto e poi lo rende la meccanica di gioco: vedi la struttura dati **viva sullo schermo** mentre combatti.
+Un'**avventura a enigmi** giocabile nel browser che insegna le **Strutture Dati & Algoritmi** partendo da zero. Per ogni "caso" prima **scegli la struttura dati giusta**, poi la **usi tu, passo per passo**: niente azione frenetica, solo ragionamento. Capisci *quando* serve una struttura e *come funziona dentro*.
 
 ▶️ **Gioca online:** https://lori2003.github.io/Game_Data-Structures-and-Algorithms/
 
@@ -8,31 +8,29 @@ Uno **sparatutto top-down** giocabile nel browser che insegna le **Strutture Dat
 
 ---
 
-## 🕹️ Comandi
-| Tasto | Azione |
-|-------|--------|
-| `W A S D` | Muoviti |
-| `Mouse` | Mira |
-| `Click` (tieni premuto) | Spara |
-| `Spazio` | Scatto / dash (con frame di invulnerabilità) |
+## 🎯 Come si gioca
+Ogni caso ha tre momenti:
+1. **Storia** — un problema reale di Byte City (la coda allo sportello, l'archivio ordinato, l'Annulla dell'editor…).
+2. **Scelta** — decidi *quale* struttura dati risolve il problema, con spiegazione del perché.
+3. **Operazione** — esegui tu le operazioni cliccando sulla struttura animata. Niente bersaglio "pre-illuminato": devi calcolare e ragionare davvero (es. l'hash lo calcoli tu, il minimo del sorting lo cerchi tu).
 
-## 🧠 Le 9 missioni
-1. **Boot Camp** — cos'è un algoritmo + controlli
-2. **Array** — accesso diretto O(1)
-3. **Stack** — LIFO (pop dalla cima)
-4. **Queue** — FIFO (servi il primo)
-5. **Hash Table** — `h(k) = k mod 7`, O(1) medio
-6. **Ricerca Binaria** — spara al mezzo, O(log n)
-7. **Sorting** — selection sort, ordine crescente
-8. **BST** — albero binario di ricerca, visita in-order
-9. **Boss: Kernel Panic** — applica tutto sotto pressione
+## 🧠 I 9 casi
+1. **Il primo algoritmo** — cos'è un algoritmo (sequenza di passi precisi)
+2. **Il magazzino numerato** — Array, accesso diretto O(1)
+3. **Annulla, annulla, annulla!** — Stack, LIFO (pop dalla cima)
+4. **Lo sportello** — Queue, FIFO (servi il primo)
+5. **Il deposito bagagli** — Hash Table, `h(k)=k mod 7`, collisioni e chaining
+6. **L'archivio ordinato** — Ricerca Binaria, dimezza al mezzo, O(log n)
+7. **La classifica da sistemare** — Sorting, selection sort
+8. **L'albero delle decisioni** — BST, regola sinistra/destra + visita in-order
+9. **Blackout di sistema** — caso finale: riconosci e scegli la struttura giusta per ogni guasto
 
-Extra: combo multiplier, XP/level-up, **Codex** dei concetti, classifica online.
+Extra: punti per caso, serie (streak), precisione, **Codex** dei concetti, classifica online.
 
 ---
 
 ## ☁️ Salvataggio dati su Supabase
-Ogni completamento di missione viene salvato automaticamente su Supabase (punteggio, combo, precisione, XP) e mostrato nella **🏆 Classifica** in-game.
+Ogni caso risolto viene salvato automaticamente su Supabase (punteggio, serie, precisione) e mostrato nella **🏆 Classifica** in-game. La struttura della tabella è invariata: lo script di setup è lo stesso.
 
 ### Setup (una volta sola)
 1. Apri il tuo progetto Supabase → **SQL Editor** → **New query**
@@ -53,4 +51,4 @@ Apri semplicemente `index.html` con doppio clic. Funziona offline (il salvataggi
 
 ---
 
-Costruito con HTML5 Canvas puro, zero dipendenze di build. Solo la libreria Supabase è caricata via CDN.
+Costruito con HTML/CSS/JS puro, zero dipendenze di build. Solo la libreria Supabase è caricata via CDN.
