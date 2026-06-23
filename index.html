@@ -6,16 +6,16 @@
 <title>ALGO QUEST — impara le Strutture Dati risolvendo casi reali</title>
 <style>
   :root{
-    --bg:#05070f; --panel:#0b1020; --panel2:#121a33; --line:#21304f;
-    --cyan:#2de2e6; --mag:#ff2e88; --yel:#ffd84d; --grn:#38f9a0; --pur:#a86bff; --org:#ff9f45;
-    --txt:#eaf2ff; --muted:#8ba0c8;
+    --bg:#0b0a1f; --panel:#191634; --panel2:#241e4d; --line:#3d3470;
+    --cyan:#22e3ff; --mag:#ff4d9d; --yel:#ffd34a; --grn:#39ffb4; --pur:#b07bff; --org:#ff8a45;
+    --txt:#f3f1ff; --muted:#aaa0da;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;overflow:hidden;overscroll-behavior:none}
-  body{background:#02030a;color:var(--txt);font-family:"Segoe UI",Roboto,system-ui,sans-serif;
+  body{background:#06060f;color:var(--txt);font-family:"Segoe UI",Roboto,system-ui,sans-serif;
     height:100vh;height:100dvh;overflow:hidden;position:fixed;inset:0}
-  #wrap{position:relative;width:100%;height:100vh;height:100dvh;margin:0 auto;
-    overflow:hidden;background:#05070f}
+  #wrap{position:relative;width:100%;height:100vh;height:100dvh;margin:0 auto;overflow:hidden;
+    background:radial-gradient(130% 100% at 50% 0%,#241a52 0%,#120f2e 48%,#08071a 100%)}
   .scan{position:absolute;inset:0;pointer-events:none;z-index:6;
     background:repeating-linear-gradient(0deg,rgba(0,0,0,0) 0 2px,rgba(0,0,0,.08) 2px 3px);mix-blend-mode:multiply}
   .vig{position:absolute;inset:0;pointer-events:none;z-index:5;
@@ -23,7 +23,7 @@
 
   .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     text-align:center;padding:18px;z-index:10;overflow:hidden;
-    background:linear-gradient(180deg,rgba(5,7,15,.96),rgba(5,7,15,.99))}
+    background:radial-gradient(130% 100% at 50% 0%,rgba(40,28,92,.55) 0%,rgba(15,12,40,.92) 48%,rgba(8,7,26,.97) 100%)}
   .overlay.center{justify-content:center}
   /* la "pagina": tutto il contenuto sta qui dentro e viene ridotto per entrare nello schermo */
   .sheet{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
@@ -418,10 +418,10 @@ const CASES = [
   title:'Il primo algoritmo',
   story:`Benvenuto a Byte City, <b>Tecnico</b>. Prima di toccare i sistemi, il capo vuole essere sicuro che tu capisca la cosa più importante: cos'è davvero un <b>algoritmo</b>.`,
   lesson:`Un <b>algoritmo</b> è una ricetta: una sequenza <b>finita</b> di passi <b>precisi</b>, in ordine, per risolvere un problema. Il computer non improvvisa: esegue i passi uno dopo l'altro. Cambiare l'ordine spesso cambia il risultato.`,
-  choice:{q:'Cos\'è un algoritmo?', opts:[
-    {t:'Una sequenza finita di passi precisi per risolvere un problema', ok:true, why:'Esatto: passi precisi, in ordine, con una fine.'},
-    {t:'Un linguaggio di programmazione', ok:false, why:'No: il linguaggio è lo strumento con cui scrivi l\'algoritmo, non l\'algoritmo stesso.'},
-    {t:'Un tipo di processore', ok:false, why:'No: è una procedura, non un componente hardware.'},
+  choice:{q:'Quale di questi è DAVVERO un algoritmo?', opts:[
+    {t:'Le istruzioni del caffè: macina 18g, filtra, acqua a 92°C, estrai per 25s', ok:true, why:'Sì: passi precisi, finiti e non ambigui — chiunque li esegue ottiene lo stesso risultato.'},
+    {t:'«Cucina qualcosa di buono»', ok:false, why:'No: è ambiguo. Un algoritmo non lascia spazio a interpretazioni, ogni passo è preciso.'},
+    {t:'«Continua a sommare numeri, per sempre»', ok:false, why:'No: non finisce mai. Un algoritmo deve essere finito, deve avere una fine.'},
   ]},
   play:{type:'sequence'},
   codex:{t:'Algoritmo',bo:'—',d:'Sequenza finita di passi precisi, in ordine, per risolvere un problema. Base di tutto: ogni struttura dati esiste per far girare meglio gli algoritmi.'}
@@ -609,7 +609,7 @@ function caseComplete(){
 
 // ====== PUZZLE ENGINES ======
 
-// --- sequence (algoritmo) ---
+// --- sequence (algoritmo): 1) ordina i passi  2) ESEGUILO su dati veri ---
 function playSequence(){
   const steps=[
     'Prendi il primo numero come "massimo provvisorio"',
@@ -618,8 +618,10 @@ function playSequence(){
     'Alla fine, il massimo provvisorio è il risultato',
   ];
   const shuffled=steps.map((s,i)=>i).sort(()=>Math.random()-.5);
-  P=newP({type:'sequence',steps,shuffled,placed:[],next:0,required:steps.length});
-  setObjective('🧭 Un algoritmo è una sequenza di passi PRECISI. Ordina i passi di "trova il numero più grande", dal primo all\'ultimo.');
+  const list=[3,7,2,9,5];
+  P=newP({type:'sequence',phase:'order',steps,shuffled,placed:[],next:0,
+    list,idx:1,curMax:list[0],required:steps.length+(list.length-1)});
+  setObjective('🧭 Un algoritmo è una sequenza di passi PRECISI. Prima <b>ordina</b> i passi di "trova il numero più grande", dal primo all\'ultimo.');
   renderSequence();
 }
 function renderSequence(){
@@ -634,8 +636,47 @@ function renderSequence(){
 }
 function seqClick(idx){
   if(idx===P.next){ P.placed.push(idx); P.next++; correctOp(); feedback('✓ Passo '+P.next+' al posto giusto.',true);
-    if(P.next>=P.steps.length){ updateStats(); setTimeout(caseComplete,350); return; } renderSequence(); }
+    if(P.next>=P.steps.length){ updateStats(); P.phase='run'; setTimeout(startSeqRun,450); return; } renderSequence(); }
   else { wrongOp(); feedback('✗ Non è il passo successivo. Cosa va fatto PRIMA di questo?',false); }
+  updateStats();
+}
+// fase 2: esegui l'algoritmo passo per passo su una lista reale (prevedi → verifica)
+function startSeqRun(){
+  setObjective('▶️ Ora <b>esegui</b> il tuo algoritmo su <b>['+P.list.join(', ')+']</b>. Ad ogni confronto, clicca quale numero è il <b>massimo provvisorio</b>.');
+  renderSeqRun();
+}
+function renderSeqRun(){
+  stage.innerHTML='';
+  const cand=P.list[P.idx];
+  stage.appendChild(ce('div','hint','massimo finora <b style="color:var(--grn)">'+P.curMax+'</b> &nbsp;·&nbsp; confronto con <b style="color:var(--cyan)">'+cand+'</b>'));
+  const row=ce('div','srow');
+  P.list.forEach((v,i)=>{
+    let cls='scell';
+    if(i>P.idx) cls+=' locked';                 // numeri non ancora raggiunti
+    if(v===P.curMax) cls+=' sorted';            // massimo attuale (verde)
+    if(i===P.idx) cls+=' front';                // numero in confronto (ciano)
+    const c=ce('div',cls,'<span>'+v+'</span><span class="idx">idx '+i+'</span>');
+    if(i<=P.idx) c.onclick=()=>seqRunClick(i);
+    row.appendChild(c);
+  });
+  stage.appendChild(row);
+  stage.appendChild(ce('div','hint','clicca il numero che ORA è il massimo provvisorio'));
+}
+function seqRunClick(i){
+  const cand=P.list[P.idx], newMax=Math.max(P.curMax,cand);
+  if(P.list[i]===newMax){
+    correctOp();
+    feedback(cand>P.curMax ? ('✓ '+cand+' > '+P.curMax+' → il massimo si AGGIORNA a '+cand+'.')
+                            : ('✓ '+cand+' ≤ '+P.curMax+' → il massimo RESTA '+P.curMax+'.'), true);
+    P.curMax=newMax; P.idx++;
+    if(P.idx>=P.list.length){ updateStats();
+      feedback('🏁 Fine lista: il numero più grande è '+P.curMax+'. Hai ESEGUITO l\'algoritmo, non solo descritto!',true);
+      setTimeout(caseComplete,800); return; }
+    renderSeqRun();
+  } else {
+    wrongOp();
+    feedback('✗ Confronta il massimo finora ('+P.curMax+') con '+cand+': vince il più grande dei due.',false);
+  }
   updateStats();
 }
 
