@@ -21,13 +21,13 @@
   .vig{position:absolute;inset:0;pointer-events:none;z-index:5;
     background:radial-gradient(120% 90% at 50% 40%,transparent 60%,rgba(0,0,0,.5) 100%)}
 
-  .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
-    text-align:center;padding:22px;z-index:10;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  .overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    text-align:center;padding:18px;z-index:10;overflow:hidden;
     background:linear-gradient(180deg,rgba(5,7,15,.96),rgba(5,7,15,.99))}
-  .overlay>*{flex-shrink:0}
   .overlay.center{justify-content:center}
-  /* centra verticalmente quando il contenuto ci sta, ma senza tagliare se è più alto */
-  .overlay::before,.overlay::after{content:"";flex:1 1 auto;min-height:0}
+  /* la "pagina": tutto il contenuto sta qui dentro e viene ridotto per entrare nello schermo */
+  .sheet{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+    width:100%;transform-origin:center center}
   .hidden{display:none!important}
   h1{font-size:54px;letter-spacing:7px;font-weight:900;line-height:1;
     background:linear-gradient(90deg,var(--cyan),var(--pur),var(--mag));-webkit-background-clip:text;background-clip:text;color:transparent;
@@ -537,7 +537,39 @@ let state='login';
 let mi=0, M=null, P=null;
 const loginEl=el('login'),menu=el('menu'),briefS=el('brief'),playS=el('play'),doneS=el('done'),vicS=el('victory'),codexS=el('codex'),lbS=el('lb');
 const stage=el('stage');
-function showOnly(o){[loginEl,menu,briefS,playS,doneS,vicS,codexS,lbS].forEach(x=>x.classList.add('hidden')); if(o)o.classList.remove('hidden');}
+const OVERLAYS=[loginEl,menu,briefS,playS,doneS,vicS,codexS,lbS];
+function showOnly(o){OVERLAYS.forEach(x=>x.classList.add('hidden')); if(o){o.classList.remove('hidden'); queueFit();}}
+
+// ---------- fit-to-screen: ogni schermata entra intera, senza scroll ----------
+function wrapOverlays(){
+  OVERLAYS.forEach(ov=>{
+    if(!ov) return;
+    if(ov.firstElementChild && ov.firstElementChild.classList.contains('sheet')) return;
+    const sheet=document.createElement('div'); sheet.className='sheet';
+    while(ov.firstChild) sheet.appendChild(ov.firstChild);
+    ov.appendChild(sheet);
+    if('ResizeObserver' in window){ new ResizeObserver(queueFit).observe(sheet); }
+  });
+}
+function fitActive(){
+  const ov=OVERLAYS.find(x=>x && !x.classList.contains('hidden'));
+  if(!ov) return;
+  const sheet=ov.firstElementChild;
+  if(!sheet || !sheet.classList.contains('sheet')) return;
+  sheet.style.transform='none';                              // misura a scala piena
+  const cs=getComputedStyle(ov);
+  const availW=ov.clientWidth -parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+  const availH=ov.clientHeight-parseFloat(cs.paddingTop) -parseFloat(cs.paddingBottom);
+  const w=sheet.offsetWidth, h=sheet.offsetHeight;
+  if(!w || !h) return;
+  const s=Math.min(1, availW/w, availH/h);
+  sheet.style.transform = s<1 ? 'scale('+s+')' : 'none';
+}
+let fitQueued=false;
+function queueFit(){ if(fitQueued) return; fitQueued=true;
+  requestAnimationFrame(()=>{ fitQueued=false; fitActive(); }); }
+addEventListener('resize', queueFit);
+addEventListener('orientationchange', ()=>setTimeout(queueFit,200));
 
 // ---------- shared play helpers ----------
 function setObjective(html){ el('playObjective').innerHTML=html; }
@@ -955,7 +987,7 @@ el('resetBtn').onclick=()=>{
   }};
 
 // ---------- boot ----------
-buildGrid(); updatePlayerChip(); showLogin();
+wrapOverlays(); buildGrid(); updatePlayerChip(); showLogin(); queueFit();
 </script>
 </body>
 </html>
