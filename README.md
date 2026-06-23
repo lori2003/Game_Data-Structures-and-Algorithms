@@ -12,7 +12,9 @@ Un'**avventura a enigmi** giocabile nel browser che insegna le **Strutture Dati 
 Ogni caso ha tre momenti:
 1. **Storia** — un problema reale di Byte City (la coda allo sportello, l'archivio ordinato, l'Annulla dell'editor…).
 2. **Scelta** — decidi *quale* struttura dati risolve il problema, con spiegazione del perché.
-3. **Operazione** — esegui tu le operazioni cliccando sulla struttura animata. Niente bersaglio "pre-illuminato": devi calcolare e ragionare davvero (es. l'hash lo calcoli tu, il minimo del sorting lo cerchi tu).
+3. **Operazione** — esegui tu le operazioni cliccando sulla struttura animata. Niente bersaglio "pre-illuminato": devi calcolare e ragionare davvero (es. l'hash lo calcoli tu, il minimo del sorting lo cerchi tu). Nel primo caso, dopo aver ordinato i passi, **esegui l'algoritmo su una lista vera** prevedendo il massimo passo per passo.
+
+> 🔀 **Ogni partita è diversa**: le domande sono pescate a caso da un pool (con risposte mescolate) e i dati dei puzzle sono generati casualmente. Se resetti e ricominci, non ritrovi gli stessi quesiti.
 
 ## 🧠 I 9 casi
 1. **Il primo algoritmo** — cos'è un algoritmo (sequenza di passi precisi)
