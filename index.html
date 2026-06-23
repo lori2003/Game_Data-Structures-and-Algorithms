@@ -418,11 +418,23 @@ const CASES = [
   title:'Il primo algoritmo',
   story:`Benvenuto a Byte City, <b>Tecnico</b>. Prima di toccare i sistemi, il capo vuole essere sicuro che tu capisca la cosa più importante: cos'è davvero un <b>algoritmo</b>.`,
   lesson:`Un <b>algoritmo</b> è una ricetta: una sequenza <b>finita</b> di passi <b>precisi</b>, in ordine, per risolvere un problema. Il computer non improvvisa: esegue i passi uno dopo l'altro. Cambiare l'ordine spesso cambia il risultato.`,
-  choice:{q:'Quale di questi è DAVVERO un algoritmo?', opts:[
+  choices:[
+   {q:'Quale di questi è DAVVERO un algoritmo?', opts:[
     {t:'Le istruzioni del caffè: macina 18g, filtra, acqua a 92°C, estrai per 25s', ok:true, why:'Sì: passi precisi, finiti e non ambigui — chiunque li esegue ottiene lo stesso risultato.'},
     {t:'«Cucina qualcosa di buono»', ok:false, why:'No: è ambiguo. Un algoritmo non lascia spazio a interpretazioni, ogni passo è preciso.'},
     {t:'«Continua a sommare numeri, per sempre»', ok:false, why:'No: non finisce mai. Un algoritmo deve essere finito, deve avere una fine.'},
-  ]},
+   ]},
+   {q:'Perché in un algoritmo l\'ORDINE dei passi conta?', opts:[
+    {t:'Perché eseguire gli stessi passi in ordine diverso può dare un risultato diverso', ok:true, why:'Esatto: "indossa le scarpe poi i calzini" ≠ "calzini poi scarpe". L\'ordine è parte dell\'algoritmo.'},
+    {t:'Non conta: basta che ci siano tutti i passi', ok:false, why:'No: contano sia i passi SIA il loro ordine.'},
+    {t:'Conta solo se usi un computer veloce', ok:false, why:'No: l\'ordine è logica, non dipende dalla velocità della macchina.'},
+   ]},
+   {q:'Un buon algoritmo deve essere…', opts:[
+    {t:'Una sequenza di passi precisi che prima o poi TERMINA', ok:true, why:'Sì: preciso e finito. Senza fine non risolve il problema.'},
+    {t:'Il più lungo possibile', ok:false, why:'No: lunghezza non è qualità. Conta che sia corretto e finito.'},
+    {t:'Scritto in inglese', ok:false, why:'No: la lingua non c\'entra; un algoritmo è indipendente dal linguaggio.'},
+   ]},
+  ],
   play:{type:'sequence'},
   codex:{t:'Algoritmo',bo:'—',d:'Sequenza finita di passi precisi, in ordine, per risolvere un problema. Base di tutto: ogni struttura dati esiste per far girare meglio gli algoritmi.'}
 },
@@ -431,11 +443,23 @@ const CASES = [
   title:'Il magazzino numerato',
   story:`Il magazzino ha scaffali <b>numerati da 0</b>. Il gestionale ti dà la posizione esatta di ogni pacco. Devi prenderli al volo, senza perderti tra gli scaffali.`,
   lesson:`Un <b>array</b> è una fila di celle numerate da <b>0</b>. Super-potere: <b>accesso diretto</b> — se conosci l'indice ci arrivi <i>subito</i>, senza scorrere il resto. Costo <b>O(1)</b>, tempo costante.`,
-  choice:{q:'Conosci già la POSIZIONE numerica del pacco e vuoi prenderlo in un colpo. Quale struttura?', opts:[
+  choices:[
+   {q:'Conosci già la POSIZIONE numerica del pacco e vuoi prenderlo in un colpo. Quale struttura?', opts:[
     {t:'Array (accesso diretto O(1))', ok:true, why:'Sì: posizione nota = accesso immediato, tempo costante.'},
     {t:'Stack', ok:false, why:'No: nello stack raggiungi solo la cima, non una posizione qualsiasi.'},
     {t:'Queue', ok:false, why:'No: nella coda servi solo il primo, non un indice a scelta.'},
-  ]},
+   ]},
+   {q:'In un array di 100 elementi, leggere arr[73] rispetto a arr[2]…', opts:[
+    {t:'Costa uguale: l\'accesso per indice è O(1), sempre', ok:true, why:'Esatto: l\'array salta diretto alla cella, la posizione non cambia il costo.'},
+    {t:'Costa di più, perché 73 è più lontano', ok:false, why:'No: non si "scorre" fino a 73, ci si arriva diretti. Tempo costante.'},
+    {t:'Dipende da quanti elementi ci sono', ok:false, why:'No: l\'accesso per indice è O(1) qualunque sia la dimensione.'},
+   ]},
+   {q:'Qual è il punto DEBOLE di un array per inserire un valore IN MEZZO?', opts:[
+    {t:'Deve spostare tutti gli elementi successivi: O(n)', ok:true, why:'Sì: l\'array è ottimo in lettura per indice, ma inserire in mezzo costa caro.'},
+    {t:'Nessuno: inserire in mezzo è O(1)', ok:false, why:'No: per fare spazio devi spostare tutti quelli dopo.'},
+    {t:'Non si può leggere per indice', ok:false, why:'No: leggere per indice è proprio il suo punto di forza.'},
+   ]},
+  ],
   play:{type:'array'},
   codex:{t:'Array',bo:'accesso O(1)',d:'Celle contigue numerate da 0. Accesso diretto a un indice in tempo costante; ottimo per leggere posizioni note.'}
 },
@@ -444,11 +468,23 @@ const CASES = [
   title:'Annulla, annulla, annulla!',
   story:`Un collega ha combinato un disastro nell'editor: cinque modifiche sbagliate di fila. Devi premere <b>Ctrl+Z</b> e disfarle — ma puoi annullare solo dall'ultima.`,
   lesson:`Uno <b>stack</b> è una pila di piatti: aggiungi sopra (<b>push</b>) e togli solo da sopra (<b>pop</b>). Regola <b>LIFO</b> — Last In, First Out. L'ultima azione fatta è la prima da annullare. Dietro c'è ogni "Annulla" e ogni chiamata di funzione.`,
-  choice:{q:'L\'ULTIMA azione fatta è la PRIMA da annullare. Quale struttura modella l\'Annulla?', opts:[
+  choices:[
+   {q:'L\'ULTIMA azione fatta è la PRIMA da annullare. Quale struttura modella l\'Annulla?', opts:[
     {t:'Stack (LIFO)', ok:true, why:'Sì: Last In First Out — l\'ultimo arrivato esce per primo.'},
     {t:'Queue (FIFO)', ok:false, why:'No: la coda disfa dal più vecchio, qui invece serve il più recente.'},
     {t:'Array ordinato', ok:false, why:'No: non serve l\'ordinamento, serve togliere sempre dall\'alto.'},
-  ]},
+   ]},
+   {q:'Pushi A, poi B, poi C in uno stack. Fai un pop: cosa esce?', opts:[
+    {t:'C — l\'ultimo entrato esce per primo', ok:true, why:'Esatto: LIFO. C era in cima, quindi esce subito.'},
+    {t:'A — il primo entrato esce per primo', ok:false, why:'No: quello è il comportamento FIFO della coda, non dello stack.'},
+    {t:'B — quello in mezzo', ok:false, why:'No: lo stack tocca solo la cima, e in cima c\'è C.'},
+   ]},
+   {q:'Le chiamate di funzione annidate (una che ne chiama un\'altra) usano…', opts:[
+    {t:'Uno stack (call stack): l\'ultima chiamata è la prima a tornare', ok:true, why:'Sì: il "call stack" è proprio uno stack LIFO.'},
+    {t:'Una coda', ok:false, why:'No: l\'ultima funzione chiamata è la prima a concludersi: è LIFO.'},
+    {t:'Una hash table', ok:false, why:'No: l\'hash serve per chiave, non per gestire chiamate annidate.'},
+   ]},
+  ],
   play:{type:'stack'},
   codex:{t:'Stack',bo:'LIFO',d:'Last In First Out. Push/pop solo dalla cima, O(1). Usato per Undo, call stack, parsing di espressioni.'}
 },
@@ -457,11 +493,23 @@ const CASES = [
   title:'Lo sportello',
   story:`All'ufficio di Byte City c'è la fila. La regola è sacra: <b>primo arrivato, primo servito</b>. Servi i cittadini nell'ordine giusto mentre altri continuano ad arrivare.`,
   lesson:`Una <b>queue</b> è la fila allo sportello: si entra in fondo (<b>enqueue</b>) e si esce davanti (<b>dequeue</b>). Regola <b>FIFO</b> — First In, First Out. Usata per code di stampa, task della CPU, messaggi in arrivo.`,
-  choice:{q:'Primo arrivato, primo servito. Quale struttura?', opts:[
+  choices:[
+   {q:'Primo arrivato, primo servito. Quale struttura?', opts:[
     {t:'Queue (FIFO)', ok:true, why:'Sì: First In First Out — si serve nell\'ordine d\'arrivo.'},
     {t:'Stack (LIFO)', ok:false, why:'No: lo stack servirebbe l\'ultimo arrivato, ingiusto per la fila!'},
     {t:'Hash table', ok:false, why:'No: l\'hash trova per chiave, non mantiene l\'ordine d\'arrivo.'},
-  ]},
+   ]},
+   {q:'In una coda entrano #1, #2, #3. Fai un dequeue: chi servi?', opts:[
+    {t:'#1 — il primo arrivato', ok:true, why:'Esatto: FIFO. Si esce dalla testa, nell\'ordine d\'arrivo.'},
+    {t:'#3 — l\'ultimo arrivato', ok:false, why:'No: quello sarebbe lo stack (LIFO). La coda serve il più vecchio.'},
+    {t:'Uno a caso', ok:false, why:'No: la coda rispetta sempre l\'ordine d\'arrivo.'},
+   ]},
+   {q:'Quale di questi casi reali è una QUEUE?', opts:[
+    {t:'I lavori inviati a una stampante condivisa', ok:true, why:'Sì: si stampa nell\'ordine in cui sono arrivati. FIFO.'},
+    {t:'Il tasto Annulla di un editor', ok:false, why:'No: l\'Annulla disfa l\'ultima azione: è uno stack (LIFO).'},
+    {t:'Cercare una parola nel dizionario ordinato', ok:false, why:'No: quella è ricerca binaria, non una coda.'},
+   ]},
+  ],
   play:{type:'queue'},
   codex:{t:'Queue',bo:'FIFO',d:'First In First Out. Enqueue in coda, dequeue in testa, O(1). Per gestire richieste in ordine d\'arrivo.'}
 },
@@ -470,11 +518,23 @@ const CASES = [
   title:'Il deposito bagagli',
   story:`Al deposito si assegna ogni valigia a un cassetto usando una <b>formula</b> sul numero della chiave. Così la ritrovi senza cercarla ovunque. Cassetti: 7 (da 0 a 6).`,
   lesson:`Una <b>hash table</b> salva le cose in "cassetti" (bucket). Una <b>funzione hash</b> trasforma la chiave in un indice: qui usiamo <b>h(k)=k mod 7</b>. Trovi un dato senza cercarlo ovunque: <b>O(1)</b> medio. Se due chiavi finiscono nello stesso cassetto = <i>collisione</i>, e si concatenano (chaining).`,
-  choice:{q:'Vuoi riporre e ritrovare oggetti tramite una chiave, usando una formula. Quale struttura?', opts:[
+  choices:[
+   {q:'Vuoi riporre e ritrovare oggetti tramite una chiave, usando una formula. Quale struttura?', opts:[
     {t:'Hash table', ok:true, why:'Sì: la funzione hash mappa la chiave a un bucket, accesso O(1) medio.'},
     {t:'Array ordinato', ok:false, why:'No: l\'array ordinato richiede una ricerca; l\'hash va diretto col calcolo.'},
     {t:'Stack', ok:false, why:'No: lo stack non sa ritrovare un elemento per chiave.'},
-  ]},
+   ]},
+   {q:'Con h(k)=k mod 7, in quale cassetto va la chiave 30?', opts:[
+    {t:'Cassetto 2 (30 mod 7 = 2)', ok:true, why:'Esatto: 30 = 4×7 + 2, quindi resto 2.'},
+    {t:'Cassetto 0', ok:false, why:'No: 30 mod 7 = 2, non 0. (0 sarebbe un multiplo di 7, es. 14.)'},
+    {t:'Cassetto 7', ok:false, why:'No: i cassetti vanno da 0 a 6; il resto mod 7 non può essere 7.'},
+   ]},
+   {q:'Due chiavi diverse finiscono nello STESSO cassetto. Come si chiama, e cosa si fa?', opts:[
+    {t:'Collisione: si concatenano nello stesso bucket (chaining)', ok:true, why:'Sì: è normale. Le si mette in lista nello stesso cassetto.'},
+    {t:'Errore fatale: la tabella si rompe', ok:false, why:'No: le collisioni sono previste e gestite, non rompono nulla.'},
+    {t:'La seconda chiave viene scartata', ok:false, why:'No: nessuna chiave si perde; si concatenano.'},
+   ]},
+  ],
   play:{type:'hash'},
   codex:{t:'Hash Table',bo:'O(1) medio',d:'Una funzione hash mappa la chiave a un bucket. Inserimento/ricerca in tempo medio costante. Le collisioni si gestiscono con concatenazione (chaining).'}
 },
@@ -483,11 +543,23 @@ const CASES = [
   title:'L\'archivio ordinato',
   story:`Un archivio enorme ma già <b>ordinato</b>. Cercare scorrendo tutto sarebbe lentissimo. C'è un trucco: guarda sempre l'elemento di <b>mezzo</b> e butta via metà archivio ogni volta.`,
   lesson:`Su una lista <b>ordinata</b>: guardi l'elemento di <b>mezzo</b> (mid). Troppo grande? scarti la metà destra. Troppo piccolo? scarti la metà sinistra. <b>Dimezzi ogni volta</b>. 1.000.000 elementi → ~20 passi. Questo è <b>O(log n)</b>. Funziona SOLO se i dati sono ordinati.`,
-  choice:{q:'Archivio ORDINATO e gigantesco: trovare un valore in pochissimi passi. Come?', opts:[
+  choices:[
+   {q:'Archivio ORDINATO e gigantesco: trovare un valore in pochissimi passi. Come?', opts:[
     {t:'Ricerca binaria (guarda il mezzo, dimezza)', ok:true, why:'Sì: su dati ordinati, ~20 passi invece di un milione. O(log n).'},
     {t:'Scorri tutto dall\'inizio (lineare)', ok:false, why:'Funziona ma è O(n): spreco enorme su dati già ordinati.'},
     {t:'Hash casuale', ok:false, why:'No: qui sfrutti l\'ordinamento, non una formula sulla chiave.'},
-  ]},
+   ]},
+   {q:'Qual è la CONDIZIONE perché la ricerca binaria funzioni?', opts:[
+    {t:'I dati devono essere già ordinati', ok:true, why:'Esatto: senza ordinamento "scartare metà" non avrebbe senso.'},
+    {t:'I dati devono essere numeri', ok:false, why:'No: funziona con qualsiasi cosa ordinabile, anche parole.'},
+    {t:'Nessuna condizione', ok:false, why:'No: c\'è una condizione precisa — devono essere ordinati.'},
+   ]},
+   {q:'Su 1.000.000 di voci ordinate, la ricerca binaria fa circa…', opts:[
+    {t:'~20 confronti (log₂ di un milione)', ok:true, why:'Sì: dimezzando ogni volta, bastano una ventina di passi. O(log n).'},
+    {t:'~500.000 confronti', ok:false, why:'No: quella è la media della ricerca lineare, molto più lenta.'},
+    {t:'~1.000.000 di confronti', ok:false, why:'No: quello è il caso peggiore della ricerca lineare.'},
+   ]},
+  ],
   play:{type:'bsearch'},
   codex:{t:'Ricerca Binaria',bo:'O(log n)',d:'Su dati ordinati, confronta col mezzo e scarta metà spazio ogni volta. Velocissima, ma richiede ordinamento.'}
 },
@@ -496,11 +568,23 @@ const CASES = [
   title:'La classifica da sistemare',
   story:`La classifica dei punteggi è arrivata tutta disordinata. Devi ordinarla in modo crescente con un metodo semplice e chiaro: il <b>selection sort</b>.`,
   lesson:`<b>Ordinare</b> = mettere in sequenza. Tanti algoritmi (vedi la ricerca binaria!) funzionano solo su dati ordinati. <b>Selection sort</b>: trova il valore più <b>piccolo</b> dei rimasti e mettilo per primo; poi il più piccolo dei rimasti; e così via. Semplice ma <b>O(n²)</b>.`,
-  choice:{q:'Hai dati disordinati e li vuoi in ordine crescente. Cosa applichi?', opts:[
+  choices:[
+   {q:'Hai dati disordinati e li vuoi in ordine crescente. Cosa applichi?', opts:[
     {t:'Un algoritmo di sorting (es. selection sort)', ok:true, why:'Sì: il sorting riordina i dati; è il presupposto di tante ricerche veloci.'},
     {t:'Una hash table', ok:false, why:'No: l\'hash sparpaglia le chiavi, NON le tiene in ordine.'},
     {t:'Uno stack', ok:false, why:'No: lo stack gestisce solo cima; non ordina.'},
-  ]},
+   ]},
+   {q:'Nel selection sort, qual è il primo passo su [5, 2, 8, 1]?', opts:[
+    {t:'Trovare il minimo (1) e metterlo in testa', ok:true, why:'Esatto: selection sort sceglie ogni volta il minimo dei rimasti.'},
+    {t:'Scambiare i primi due elementi (5 e 2)', ok:false, why:'No: quello somiglia al bubble sort. Qui si cerca il minimo.'},
+    {t:'Dividere la lista a metà', ok:false, why:'No: quello è il merge sort. Il selection sort cerca il minimo.'},
+   ]},
+   {q:'Perché il selection sort è O(n²)?', opts:[
+    {t:'Per ogni posizione scorre i rimanenti per trovare il minimo', ok:true, why:'Sì: ~n passaggi, ognuno scorre ~n elementi → n×n.'},
+    {t:'Perché usa tantissima memoria', ok:false, why:'No: il problema è il numero di confronti, non la memoria.'},
+    {t:'Perché funziona solo su numeri', ok:false, why:'No: non c\'entra il tipo di dato; è il numero di confronti.'},
+   ]},
+  ],
   play:{type:'sort'},
   codex:{t:'Selection Sort',bo:'O(n²)',d:'Ad ogni passo scegli il minimo dei rimasti e lo metti in posizione. Semplice ma quadratico; ordinare è la chiave per algoritmi efficienti.'}
 },
@@ -509,11 +593,23 @@ const CASES = [
   title:'L\'albero delle decisioni',
   story:`I dati di Byte City vanno tenuti ordinati ma facili da aggiornare. Soluzione: un <b>albero binario di ricerca</b>. A sinistra i minori, a destra i maggiori — e la visita giusta li restituisce già in ordine.`,
   lesson:`Un <b>BST</b> è un albero: ogni nodo ha fino a 2 figli. Regola d'oro: a <b>sinistra</b> i valori minori, a <b>destra</b> i maggiori. La visita <b>in-order</b> (sinistra → radice → destra) restituisce i valori <b>in ordine crescente</b>! Ricerca/inserimento O(log n) se l'albero è bilanciato.`,
-  choice:{q:'Vuoi dati sempre ordinati MA con inserimenti rapidi (non un array rigido). Cosa scegli?', opts:[
+  choices:[
+   {q:'Vuoi dati sempre ordinati MA con inserimenti rapidi (non un array rigido). Cosa scegli?', opts:[
     {t:'Albero binario di ricerca (BST)', ok:true, why:'Sì: tiene l\'ordine e permette ricerca/inserimento in O(log n).'},
     {t:'Array ordinato', ok:false, why:'Tiene l\'ordine ma inserire in mezzo costa O(n): devi spostare tutto.'},
     {t:'Queue', ok:false, why:'No: la coda non mantiene un ordinamento per valore.'},
-  ]},
+   ]},
+   {q:'Sei al nodo 50 e devi inserire 30. Dove vai?', opts:[
+    {t:'A sinistra (30 < 50)', ok:true, why:'Esatto: regola del BST — i minori vanno a sinistra.'},
+    {t:'A destra (30 > 50)', ok:false, why:'No: 30 è minore di 50, quindi va a sinistra.'},
+    {t:'Resta sul nodo 50', ok:false, why:'No: si scende sempre a sinistra o a destra finché c\'è posto.'},
+   ]},
+   {q:'Quale visita di un BST restituisce i valori GIÀ in ordine crescente?', opts:[
+    {t:'In-order: sinistra → radice → destra', ok:true, why:'Sì: la visita in-order di un BST dà la sequenza ordinata.'},
+    {t:'Pre-order: radice → sinistra → destra', ok:false, why:'No: la pre-order non produce l\'ordine crescente.'},
+    {t:'Una visita a caso', ok:false, why:'No: serve proprio la in-order per avere l\'ordine.'},
+   ]},
+  ],
   play:{type:'bst'},
   codex:{t:'BST + In-order',bo:'O(log n)',d:'Albero ordinato: sinistra<nodo<destra. La visita in-order produce la sequenza ordinata. Ricerca/inserimento O(log n) se bilanciato.'}
 },
@@ -522,11 +618,23 @@ const CASES = [
   title:'Blackout di sistema',
   story:`<b>Kernel Panic!</b> Mezza Byte City è in tilt: cinque guasti diversi, tutti insieme. Niente operazioni manuali: ora devi <b>scegliere al volo la struttura giusta</b> per ogni problema. Mostra cosa hai imparato.`,
   lesson:`Nessuna regola nuova: la sfida è <b>riconoscere il problema</b> e scegliere lo strumento adatto. È la competenza che conta di più: usare la struttura giusta cambia le prestazioni da lente a istantanee.`,
-  choice:{q:'Qual è il vero vantaggio di scegliere la struttura dati giusta?', opts:[
+  choices:[
+   {q:'Qual è il vero vantaggio di scegliere la struttura dati giusta?', opts:[
     {t:'Le operazioni diventano molto più veloci (Big-O migliore)', ok:true, why:'Esatto: la struttura giusta abbatte il costo, da O(n) a O(1) o O(log n).'},
     {t:'Il codice diventa più colorato', ok:false, why:'No: è una questione di efficienza e correttezza, non estetica.'},
     {t:'Non cambia nulla', ok:false, why:'Cambia eccome: su milioni di dati è la differenza tra istantaneo e bloccato.'},
-  ]},
+   ]},
+   {q:'Cosa misura la notazione Big-O?', opts:[
+    {t:'Come cresce il costo all\'aumentare dei dati', ok:true, why:'Esatto: descrive l\'andamento (O(1), O(log n), O(n), O(n²)…), non i secondi esatti.'},
+    {t:'Quanti colori usa il programma', ok:false, why:'No: è una misura di efficienza, non estetica.'},
+    {t:'Il prezzo del computer', ok:false, why:'No: riguarda l\'algoritmo, non l\'hardware.'},
+   ]},
+   {q:'Ordina dal più veloce al più lento (per n grande): O(1), O(n), O(log n).', opts:[
+    {t:'O(1) < O(log n) < O(n)', ok:true, why:'Esatto: costante, poi logaritmico, poi lineare.'},
+    {t:'O(n) < O(log n) < O(1)', ok:false, why:'No: è il contrario — O(1) è il più veloce.'},
+    {t:'Sono tutti uguali', ok:false, why:'No: su n grande la differenza è enorme.'},
+   ]},
+  ],
   play:{type:'review'},
   codex:{t:'Big-O & scelta',bo:'MASTER',d:'Hai completato ALGO QUEST. Saper scegliere la struttura giusta (e conoscerne il costo) è il cuore delle Strutture Dati & Algoritmi.'}
 },
@@ -618,7 +726,9 @@ function playSequence(){
     'Alla fine, il massimo provvisorio è il risultato',
   ];
   const shuffled=steps.map((s,i)=>i).sort(()=>Math.random()-.5);
-  const list=[3,7,2,9,5];
+  const list=[]; while(list.length<5){ const x=(Math.random()*20+1)|0; if(!list.includes(x))list.push(x); }
+  const mx=Math.max(...list);                 // assicura che il massimo NON sia già il primo
+  if(list[0]===mx){ const j=1+((Math.random()*(list.length-1))|0); const t=list[0]; list[0]=list[j]; list[j]=t; }
   P=newP({type:'sequence',phase:'order',steps,shuffled,placed:[],next:0,
     list,idx:1,curMax:list[0],required:steps.length+(list.length-1)});
   setObjective('🧭 Un algoritmo è una sequenza di passi PRECISI. Prima <b>ordina</b> i passi di "trova il numero più grande", dal primo all\'ultimo.');
@@ -707,7 +817,9 @@ function arrayClick(i){
 
 // --- stack ---
 function playStack(){
-  const items=['apri file','scrivi "ciao"','cancella riga','incolla blocco','rinomina var'];
+  const pool=['apri file','scrivi "ciao"','cancella riga','incolla blocco','rinomina var',
+    'grassetto','taglia testo','formatta','inserisci tabella','indenta riga','sottolinea','colora cella'];
+  const items=shuffleArr(pool.slice()).slice(0,4+((Math.random()*2)|0));   // 4 o 5 azioni casuali
   P=newP({type:'stack',stack:items.slice(),required:items.length});
   setObjective('🥞 Annulla TUTTE le azioni con pop (Ctrl+Z). Puoi togliere SOLO dalla cima (LIFO).');
   renderStack();
@@ -731,7 +843,10 @@ function stackClick(i){
 
 // --- queue ---
 function playQueue(){
-  P=newP({type:'queue',q:[1,2,3,4],next:5,maxId:10,served:0,required:8});
+  const start=3+((Math.random()*2)|0);          // 3 o 4 già in fila
+  const q=[]; for(let i=1;i<=start;i++)q.push(i);
+  const need=6+((Math.random()*3)|0);           // da servire: 6..8
+  P=newP({type:'queue',q,next:start+1,maxId:start+need,served:0,required:need});
   setObjective('🚶 Servi i cittadini nell\'ordine d\'arrivo (FIFO). Clicca il PRIMO della fila.');
   renderQueue();
 }
@@ -755,9 +870,15 @@ function queueClick(){
 
 // --- hash ---
 function playHash(){
-  P=newP({type:'hash',N:7,phase:'store',buckets:Array.from({length:7},()=>[]),
-    keys:[23,14,16,40], ki:0, retr:[16,40], ri:0, required:6});
-  // 23%7=2, 14%7=0, 16%7=2 (collisione!), 40%7=5
+  const N=7;
+  const keys=[]; while(keys.length<4){ const k=(Math.random()*80+10)|0; if(!keys.includes(k))keys.push(k); }
+  // forza una collisione: keys[1] avrà lo stesso resto mod N di keys[0]
+  let nk=keys[0]%N + N*(2+((Math.random()*8)|0));
+  while(keys.includes(nk)||nk===keys[0]) nk+=N;
+  keys[1]=nk; shuffleArr(keys);
+  const retr=shuffleArr(keys.slice()).slice(0,2);   // 2 chiavi da recuperare
+  P=newP({type:'hash',N,phase:'store',buckets:Array.from({length:N},()=>[]),
+    keys, ki:0, retr, ri:0, required:keys.length+retr.length});
   hashObjective(); renderHash();
 }
 function hashObjective(){
@@ -852,7 +973,8 @@ function sortClick(i){
 
 // --- BST (warmup decisioni + visita in-order) ---
 function playBst(){
-  const order=[50,30,70,20,40,60,80];
+  const vals=[]; while(vals.length<7){ const x=(Math.random()*90+10)|0; if(!vals.includes(x))vals.push(x); }
+  const order=shuffleArr(vals.slice());        // valori e ordine d'inserimento casuali
   let root=null; const ins=(n,v)=>{ if(!n)return{v,l:null,r:null}; if(v<n.v)n.l=ins(n.l,v); else n.r=ins(n.r,v); return n; };
   order.forEach(v=>root=ins(root,v));
   const io=[]; (function ino(n){ if(!n)return; ino(n.l); io.push(n.v); ino(n.r); })(root);
@@ -862,9 +984,11 @@ function playBst(){
   (function place(n,d,par){ if(!n)return;
     n.px=60+n.ix*((760-120)/(total-1)); n.py=34+d*((280-34)/Math.max(1,maxd)); nodes.push(n);
     if(par)edges.push([par,n]); place(n.l,d+1,n); place(n.r,d+1,n); })(root,0,null);
+  const wnodes=shuffleArr(vals.slice());       // 3 domande di riscaldamento dai valori dell'albero
+  const warm=[]; for(let q=0;q<3;q++){ const node=wnodes[q]; let v; do{ v=(Math.random()*99+1)|0; }while(v===node || vals.includes(v));
+    warm.push({node, v, ans: v<node?'L':'R'}); }
   P=newP({type:'bst',root,io,nodes,edges,done:[],phase:'warm',
-    warm:[{node:50,v:35,ans:'L'},{node:30,v:45,ans:'R'},{node:70,v:90,ans:'R'}], wi:0, step:0,
-    required:3+io.length});
+    warm, wi:0, step:0, required:3+io.length});
   renderBstWarm();
 }
 function renderBstWarm(){
@@ -912,18 +1036,33 @@ function bstClick(n){
 
 // --- review (caso finale) ---
 function playReview(){
-  P=newP({type:'review',qi:0,required:5,qs:[
-    {s:'Le chiamate "Annulla" (Ctrl+Z) di un editor di testo', opts:['Stack (LIFO)','Queue (FIFO)','Array'], ok:0,
+  const POOL=[
+    {s:'Le chiamate "Annulla" (Ctrl+Z) di un editor di testo', ok:'Stack (LIFO)', wrong:['Queue (FIFO)','Array','Hash table'],
       why:'L\'ultima azione fatta è la prima da annullare: LIFO = Stack.'},
-    {s:'I lavori inviati a una stampante condivisa in ufficio', opts:['Stack (LIFO)','Queue (FIFO)','Hash table'], ok:1,
+    {s:'I lavori inviati a una stampante condivisa in ufficio', ok:'Queue (FIFO)', wrong:['Stack (LIFO)','Hash table','BST'],
       why:'Primo arrivato, primo stampato: FIFO = Queue.'},
-    {s:'Trovare un nome in una rubrica ORDINATA da 1.000.000 di voci', opts:['Scorri tutto (lineare)','Ricerca binaria','Pila'], ok:1,
+    {s:'Trovare un nome in una rubrica ORDINATA da 1.000.000 di voci', ok:'Ricerca binaria', wrong:['Scorri tutto (lineare)','Pila','Hash casuale'],
       why:'Su dati ordinati dimezzi ogni volta: ~20 passi invece di un milione. O(log n).'},
-    {s:'Recuperare un valore conoscendo già la sua POSIZIONE numerica', opts:['Array (accesso O(1))','Ricerca binaria','Stack'], ok:0,
+    {s:'Recuperare un valore conoscendo già la sua POSIZIONE numerica', ok:'Array (accesso O(1))', wrong:['Ricerca binaria','Stack','Queue'],
       why:'Posizione nota = accesso diretto in tempo costante: Array.'},
-    {s:'Salvare e ritrovare oggetti tramite una chiave usando una formula', opts:['Queue','Hash table','Array ordinato'], ok:1,
-      why:'Una funzione hash mappa la chiave a un cassetto: Hash table, O(1) medio.'},
-  ]});
+    {s:'Salvare e ritrovare oggetti tramite una chiave usando una formula', ok:'Hash table', wrong:['Queue','Array ordinato','Stack'],
+      why:'Una funzione hash mappa la chiave a un cassetto: O(1) medio.'},
+    {s:'Tenere i dati sempre ordinati con inserimenti frequenti e rapidi', ok:'BST (albero di ricerca)', wrong:['Array ordinato','Stack','Hash table'],
+      why:'Il BST mantiene l\'ordine con inserimento e ricerca in O(log n).'},
+    {s:'Gestire i task in attesa della CPU, nell\'ordine d\'arrivo', ok:'Queue (FIFO)', wrong:['Stack (LIFO)','Array','BST'],
+      why:'Si servono in ordine d\'arrivo: FIFO = Queue.'},
+    {s:'La cronologia del tasto "Indietro" del browser', ok:'Stack (LIFO)', wrong:['Queue (FIFO)','Hash table','Array ordinato'],
+      why:'Torni all\'ultima pagina visitata: LIFO = Stack.'},
+    {s:'Controllare se uno username è già preso, tra milioni, all\'istante', ok:'Hash table', wrong:['Array ordinato','Ricerca lineare','Queue'],
+      why:'L\'hash trova per chiave in tempo medio O(1).'},
+    {s:'Leggere il 500° elemento di una lista conoscendone l\'indice', ok:'Array (accesso O(1))', wrong:['Ricerca binaria','Stack','Queue'],
+      why:'Indice noto = accesso diretto, tempo costante: Array.'},
+  ];
+  const qs=shuffleArr(POOL.slice()).slice(0,5).map(q=>{
+    const opts=shuffleArr([q.ok, ...q.wrong.slice(0,2)]);   // corretta + 2 distrattori, mescolati
+    return {s:q.s, opts, ok:opts.indexOf(q.ok), why:q.why};
+  });
+  P=newP({type:'review',qi:0,required:5,qs});
   renderReview();
 }
 function renderReview(){
@@ -959,18 +1098,25 @@ function buildGrid(){ const g=el('levelGrid'); g.innerHTML='';
     if(!locked)d.onclick=()=>openBrief(i); g.appendChild(d); });
   refreshMenuStats();
 }
+// pesca una domanda a caso dal pool del caso e mescola le opzioni (anti-ripetizione)
+let curChoice=null;
+function shuffleArr(a){ for(let i=a.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; const t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function pickFrom(a){ return a[(Math.random()*a.length)|0]; }
+function pickChoice(){ const pool=M.choices||[M.choice]; const c=pickFrom(pool);
+  return { q:c.q, opts:shuffleArr(c.opts.slice()) }; }
 function openBrief(i){ mi=i; M=CASES[i]; state='brief';
   el('bfNum').textContent='CASO '+(i+1)+' / '+CASES.length;
   el('bfTitle').textContent=M.icon+'  '+M.title;
   el('bfStory').innerHTML=M.story; el('bfLesson').innerHTML=M.lesson;
-  el('bfChoiceQ').innerHTML='🤔 '+M.choice.q;
+  curChoice=pickChoice();
+  el('bfChoiceQ').innerHTML='🤔 '+curChoice.q;
   const ob=el('bfOpts'); ob.innerHTML=''; el('bfProceed').style.display='none';
   const why=el('bfWhy'); why.textContent=''; why.className='bfwhy';
-  M.choice.opts.forEach((o,idx)=>{ const b=ce('button','opt',o.t); b.onclick=()=>choiceClick(idx,b); ob.appendChild(b); });
+  curChoice.opts.forEach((o,idx)=>{ const b=ce('button','opt',o.t); b.onclick=()=>choiceClick(idx,b); ob.appendChild(b); });
   showOnly(briefS);
 }
 function choiceClick(idx,btn){
-  const o=M.choice.opts[idx]; const why=el('bfWhy');
+  const o=curChoice.opts[idx]; const why=el('bfWhy');
   if(o.ok){ btn.classList.add('ok'); why.innerHTML='✓ '+o.why; why.className='bfwhy ok';
     el('bfProceed').style.display='inline-block'; [...el('bfOpts').children].forEach(c=>c.disabled=true); sfx.good(); }
   else { btn.classList.add('no'); btn.disabled=true; why.innerHTML='✗ '+o.why; why.className='bfwhy no'; sfx.bad(); }
